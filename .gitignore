@@ -1,0 +1,41 @@
+# Node modules
+node_modules/
+
+# Build output
+.millennium/
+dist/
+
+# Generated/compiled files (should not be in git)
+index.js
+webkit.js
+
+# Generated files (copied from webkit/icons/)
+*.png
+!webkit/icons/*.png
+!static/*.png
+!Images/*.png
+
+# Release archives
+*.zip
+
+# Testing and release documentation
+TESTING_*.md
+RELEASE_NOTES_*.md
+
+# Data files
+streak_data.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Package manager
+pnpm-lock.yaml
+yarn.lock
