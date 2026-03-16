@@ -7,8 +7,7 @@
   "scripts": {
     "dev": "millennium-ttc --build dev",
     "watch": "millennium-ttc --build dev --watch",
-    "build": "millennium-ttc --build prod && npm run copy",
-    "copy": "node -e \"require('fs').copyFileSync('.millennium/Dist/index.js', 'index.js'); require('fs').copyFileSync('.millennium/Dist/webkit.js', 'webkit.js'); console.log('Files copied successfully');\""
+    "build": "millennium-ttc --build prod"
   },
   "dependencies": {
     "@steambrew/api": "^5.5.3",

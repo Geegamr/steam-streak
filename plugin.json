@@ -5,5 +5,5 @@
   "description": "Track your daily Steam profile visits and game play streaks with fire icons",
   "version": "1.0.0",
   "backendType": "lua",
-  "include": ["static", "LICENSE"]
+  "include": ["LICENSE"]
 }

@@ -1,29 +1,17 @@
-# Node modules
+# Dependencies
 node_modules/
 
 # Build output
 .millennium/
 dist/
-
-# Generated/compiled files (should not be in git)
 index.js
 webkit.js
 
-# Generated files (copied from webkit/icons/)
-*.png
-!webkit/icons/*.png
-!static/*.png
-!Images/*.png
+# Cloned repositories
+millennium-plugins/
 
 # Release archives
 *.zip
-
-# Testing and release documentation
-TESTING_*.md
-RELEASE_NOTES_*.md
-
-# Data files
-streak_data.json
 
 # IDE
 .vscode/
@@ -36,6 +24,5 @@ Thumbs.db
 # Logs
 *.log
 
-# Package manager
+# Package manager lock files
 pnpm-lock.yaml
-yarn.lock

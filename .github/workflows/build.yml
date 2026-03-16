@@ -1,0 +1,61 @@
+name: Build Plugin
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., 1.0.0)'
+        required: false
+        default: 'dev'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Create zip
+        run: |
+          mkdir -p build/steam-streak/.millennium
+          cp -r .millennium/Dist build/steam-streak/.millennium/
+          cp -r backend build/steam-streak/
+          cp -r static build/steam-streak/
+          cp plugin.json build/steam-streak/
+          cp LICENSE build/steam-streak/
+          cp README.md build/steam-streak/
+          cd build && zip -r steam-streak-${{ inputs.version }}.zip steam-streak
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: steam-streak-${{ inputs.version }}
+          path: build/steam-streak/
+          include-hidden-files: true
+          if-no-files-found: error
+
+      - name: Create Release
+        if: ${{ inputs.version != 'dev' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: Steam Streak v${{ inputs.version }}
+          files: build/steam-streak-${{ inputs.version }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

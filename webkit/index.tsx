@@ -157,61 +157,6 @@ function getProgressSVG(color: string = '#06bfff'): string {
   `;
 }
 
-async function syncDataFromBackend() {
-  try {
-    console.log('[SteamStreak] === Syncing data from backend ===');
-
-    const existingStreak = localStorage.getItem(STORAGE_KEY_STREAK());
-    console.log('[SteamStreak] Existing localStorage streak:', existingStreak);
-
-    if (!existingStreak || existingStreak === '0') {
-      console.log('[SteamStreak] No data in localStorage, checking backend...');
-
-      let attempts = 0;
-      const maxAttempts = 10;
-      
-      while (attempts < maxAttempts) {
-        const backendData = localStorage.getItem('steam_streak_data');
-        console.log('[SteamStreak] Attempt', attempts + 1, 'backend data:', backendData);
-        
-        if (backendData) {
-          try {
-            const data = JSON.parse(backendData);
-            console.log('[SteamStreak] Parsed backend data:', data);
-            
-            if (data.streak > 0) {
-
-              localStorage.setItem(STORAGE_KEY_STREAK(), data.streak.toString());
-              localStorage.setItem(STORAGE_KEY_TOTAL(), data.totalDays.toString());
-              localStorage.setItem(STORAGE_KEY_BEST(), data.bestStreak.toString());
-
-              if (data.lastVisit > 0) {
-                localStorage.setItem(STORAGE_KEY_DATE(), getTodayString());
-              }
-              
-              console.log('[SteamStreak] Data synced from backend successfully!');
-              return true;
-            }
-          } catch (e) {
-            console.error('[SteamStreak] Failed to parse backend data:', e);
-          }
-        }
-        
-        attempts++;
-        await new Promise(resolve => setTimeout(resolve, 500));
-      }
-      
-      console.log('[SteamStreak] No backend data found after', maxAttempts, 'attempts');
-    } else {
-      console.log('[SteamStreak] Data already exists in localStorage');
-    }
-    
-    return false;
-  } catch (error) {
-    console.error('[SteamStreak] syncDataFromBackend error:', error);
-    return false;
-  }
-}
 
 function getTodayString(): string {
   return new Date().toLocaleDateString();
@@ -337,11 +282,12 @@ function getFireIcon(streak: number, size: '14' | '80' = '14'): string {
   const sizeStr = size === '80' ? '80x80' : '14x14';
   let iconPath = '';
   
-  if (streak >= 300) iconPath = `https://steamloopback.host/steam-streak/temnofiolet${sizeStr}.png`;
-  else if (streak >= 100) iconPath = `https://steamloopback.host/steam-streak/fiolet${sizeStr}.png`;
-  else if (streak >= 30) iconPath = `https://steamloopback.host/steam-streak/red${sizeStr}.png`;
-  else if (streak >= 10) iconPath = `https://steamloopback.host/steam-streak/orangered${sizeStr}.png`;
-  else iconPath = `https://steamloopback.host/steam-streak/orange${sizeStr}.png`;
+  const CDN = 'https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static';
+  if (streak >= 300) iconPath = `${CDN}/temnofiolet${sizeStr}.png`;
+  else if (streak >= 100) iconPath = `${CDN}/fiolet${sizeStr}.png`;
+  else if (streak >= 30) iconPath = `${CDN}/red${sizeStr}.png`;
+  else if (streak >= 10) iconPath = `${CDN}/orangered${sizeStr}.png`;
+  else iconPath = `${CDN}/orange${sizeStr}.png`;
   
   return iconPath;
 }
@@ -353,7 +299,7 @@ function preloadIcons() {
   colors.forEach(color => {
     sizes.forEach(size => {
       const img = new Image();
-      img.src = `https://steamloopback.host/steam-streak/${color}${size}.png`;
+      img.src = `https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/${color}${size}.png`;
     });
   });
 }
@@ -495,7 +441,7 @@ function createStreakModal(streakData: any) {
         <div style="display: flex; justify-content: space-around; align-items: center; gap: 15px; position: relative;">
           <div style="text-align: center; position: relative; z-index: 1; width: 48px;">
             <div style="margin-bottom: 8px; position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
-              <img src="https://steamloopback.host/steam-streak/orange80x80.png" style="width: 48px; height: 48px; object-fit: contain; filter: ${streakData.streak >= 1 ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' : 'grayscale(100%) opacity(0.5)'};" />
+              <img src="https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/orange80x80.png" style="width: 48px; height: 48px; object-fit: contain; filter: ${streakData.streak >= 1 ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' : 'grayscale(100%) opacity(0.5)'};" />
               ${streakData.streak < 1 ? `
                 <svg style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; z-index: 10;" viewBox="0 0 24 24" fill="none">
                   <rect x="9" y="11" width="6" height="8" rx="1" fill="#2a2a2a" stroke="#5a5a5a" stroke-width="1.5"/>
@@ -541,7 +487,7 @@ function createStreakModal(streakData: any) {
           </div>
           <div style="text-align: center; position: relative; z-index: 1; width: 48px;">
             <div style="margin-bottom: 8px; position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
-              <img src="https://steamloopback.host/steam-streak/orangered80x80.png" style="width: 48px; height: 48px; object-fit: contain; filter: ${streakData.streak >= 10 ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' : 'grayscale(100%) opacity(0.5)'};" />
+              <img src="https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/orangered80x80.png" style="width: 48px; height: 48px; object-fit: contain; filter: ${streakData.streak >= 10 ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' : 'grayscale(100%) opacity(0.5)'};" />
               ${streakData.streak < 10 ? `
                 <svg style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; z-index: 10;" viewBox="0 0 24 24" fill="none">
                   <rect x="9" y="11" width="6" height="8" rx="1" fill="#2a2a2a" stroke="#5a5a5a" stroke-width="1.5"/>
@@ -554,7 +500,7 @@ function createStreakModal(streakData: any) {
           </div>
           <div style="text-align: center; position: relative; z-index: 1; width: 48px;">
             <div style="margin-bottom: 8px; position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
-              <img src="https://steamloopback.host/steam-streak/red80x80.png" style="width: 48px; height: 48px; object-fit: contain; filter: ${streakData.streak >= 30 ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' : 'grayscale(100%) opacity(0.5)'};" />
+              <img src="https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/red80x80.png" style="width: 48px; height: 48px; object-fit: contain; filter: ${streakData.streak >= 30 ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' : 'grayscale(100%) opacity(0.5)'};" />
               ${streakData.streak < 30 ? `
                 <svg style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; z-index: 10;" viewBox="0 0 24 24" fill="none">
                   <rect x="9" y="11" width="6" height="8" rx="1" fill="#2a2a2a" stroke="#5a5a5a" stroke-width="1.5"/>
@@ -567,7 +513,7 @@ function createStreakModal(streakData: any) {
           </div>
           <div style="text-align: center; position: relative; z-index: 1; width: 48px;">
             <div style="margin-bottom: 8px; position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
-              <img src="https://steamloopback.host/steam-streak/fiolet80x80.png" style="width: 48px; height: 48px; object-fit: contain; filter: ${streakData.streak >= 100 ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' : 'grayscale(100%) opacity(0.5)'};" />
+              <img src="https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/fiolet80x80.png" style="width: 48px; height: 48px; object-fit: contain; filter: ${streakData.streak >= 100 ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' : 'grayscale(100%) opacity(0.5)'};" />
               ${streakData.streak < 100 ? `
                 <svg style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; z-index: 10;" viewBox="0 0 24 24" fill="none">
                   <rect x="9" y="11" width="6" height="8" rx="1" fill="#2a2a2a" stroke="#5a5a5a" stroke-width="1.5"/>
@@ -580,7 +526,7 @@ function createStreakModal(streakData: any) {
           </div>
           <div style="text-align: center; position: relative; z-index: 1; width: 48px;">
             <div style="margin-bottom: 8px; position: relative; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
-              <img src="https://steamloopback.host/steam-streak/temnofiolet80x80.png" style="width: 48px; height: 48px; object-fit: contain; filter: ${streakData.streak >= 300 ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' : 'grayscale(100%) opacity(0.5)'};" />
+              <img src="https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/temnofiolet80x80.png" style="width: 48px; height: 48px; object-fit: contain; filter: ${streakData.streak >= 300 ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' : 'grayscale(100%) opacity(0.5)'};" />
               ${streakData.streak < 300 ? `
                 <svg style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; z-index: 10;" viewBox="0 0 24 24" fill="none">
                   <rect x="9" y="11" width="6" height="8" rx="1" fill="#2a2a2a" stroke="#5a5a5a" stroke-width="1.5"/>
@@ -941,11 +887,9 @@ function createStreakBadge(streak: number) {
   return badge;
 }
 
-async function addStreakBadge() {
+function addStreakBadge() {
   try {
     console.log('[SteamStreak] === addStreakBadge() called ===');
-
-    await syncDataFromBackend();
 
     const currentUrl = window.location.href;
     if (!currentUrl.includes('steamcommunity.com/profiles/') && 
@@ -1005,22 +949,19 @@ async function addStreakBadge() {
 }
 
 setTimeout(() => {
-  console.log('[SteamStreak] First badge creation attempt (2s delay)');
   preloadIcons();
   addStreakBadge();
-}, 2000);
+}, 500);
 
 setTimeout(() => {
-  console.log('[SteamStreak] Second badge creation attempt (4s delay)');
   if (!document.getElementById('steam-streak-badge-v2')) {
     addStreakBadge();
   }
-}, 4000);
+}, 1500);
 
 setTimeout(() => {
-  console.log('[SteamStreak] Third badge creation attempt (6s delay)');
   addStreakBadge();
-}, 6000);
+}, 3000);
 
 window.addEventListener('streakUpdated', (event: any) => {
   console.log('[SteamStreak] Streak updated event received:', event.detail);
@@ -1039,7 +980,7 @@ window.addEventListener('streakUpdated', (event: any) => {
       lastUrl = location.href;
       setTimeout(() => {
         addStreakBadge();
-      }, 2000);
+      }, 500);
     }
   }, 1000);
   
