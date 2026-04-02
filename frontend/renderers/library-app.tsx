@@ -24,7 +24,6 @@ export async function patch(
   for (const parent of parents) {
     const component = GameStreak({
       streak: currentStreakData.streak,
-      appName: app.display_name,
       window: window
     });
 
@@ -66,7 +65,6 @@ export async function patch(
         if (existing) {
           const component = GameStreak({
             streak: currentStreakData.streak,
-            appName: app.display_name,
             window: window
           });
 
