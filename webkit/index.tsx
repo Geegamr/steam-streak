@@ -1,26 +1,69 @@
-
 export default async function WebkitMain() {
   console.log('[SteamStreak] Webkit module loaded');
 
   function getCurrentSteamID(): string {
+    const cachedOwnID = localStorage.getItem('steam_streak_own_id');
+    if (cachedOwnID) return cachedOwnID;
 
     if (typeof (window as any).g_steamID !== 'undefined') {
       console.log('[SteamStreak Webkit] g_steamID found:', (window as any).g_steamID);
       return (window as any).g_steamID;
+    }
+
+    const urlMatch = window.location.href.match(/profiles\/(\d+)/);
+    if (urlMatch) {
+      console.log('[SteamStreak Webkit] Steam ID from URL:', urlMatch[1]);
+      return urlMatch[1];
+    }
+
+    console.warn('[SteamStreak Webkit] Steam ID not found, using generic key');
+    return 'unknown_user';
   }
 
-  const urlMatch = window.location.href.match(/profiles\/(\d+)/);
-  if (urlMatch) {
-    console.log('[SteamStreak Webkit] Steam ID from URL:', urlMatch[1]);
-    return urlMatch[1];
+  function tryDetectAndSaveOwnID(): void {
+    if (localStorage.getItem('steam_streak_own_id')) return;
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('game_streak_')) {
+        const match = key.match(/^game_streak_(\d{17})_/);
+        if (match) {
+          localStorage.setItem('steam_streak_own_id', match[1]);
+          console.log('[SteamStreak] Own Steam ID detected from game streak data:', match[1]);
+          return;
+        }
+      }
+    }
+
+    const urlMatch = window.location.href.match(/profiles\/(\d+)/);
+    if (!urlMatch) return;
+
+    const editBtn = document.querySelector(
+      'a[href*="edit/info"], button[class*="edit"], [class*="profile_header_actions"] a, [class*="EditProfile"]'
+    );
+    if (editBtn) {
+      localStorage.setItem('steam_streak_own_id', urlMatch[1]);
+      console.log('[SteamStreak] Own Steam ID saved via edit button class:', urlMatch[1]);
+      return;
+    }
+
+    const allButtons = document.querySelectorAll('button, [role="button"], a');
+    for (const btn of Array.from(allButtons)) {
+      const text = (btn as HTMLElement).innerText || '';
+      if (text.includes('Редактировать') || text.includes('Edit') ||
+          text.includes('Редагувати') || text.includes('编辑') ||
+          text.includes('編輯') || text.includes('プロフィールを編集') ||
+          text.includes('Bearbeiten') || text.includes('Modifier') ||
+          text.includes('Editar') || text.includes('Modifica')) {
+        localStorage.setItem('steam_streak_own_id', urlMatch[1]);
+        console.log('[SteamStreak] Own Steam ID saved via button text:', urlMatch[1]);
+        break;
+      }
+    }
   }
 
-  console.warn('[SteamStreak Webkit] Steam ID not found, using generic key');
-  return 'unknown_user';
-}
-
-const STORAGE_KEY_PREFIX = 'steam_streak_';
 const SECRET_KEY = "steam_streak_v2_secret";
+const STORAGE_KEY_PREFIX = 'steam_streak_';
 
 function simpleHash(data: string): string {
   let hash = 0;
@@ -122,30 +165,6 @@ function getStreakNumberColor(streak: number): string {
     return '#7b4397';
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 function getProgressSVG(color: string = '#06bfff'): string {
@@ -898,20 +917,35 @@ function addStreakBadge() {
       return;
     }
 
-    const allButtons = document.querySelectorAll('button, [role="button"], a, div[onclick]');
-    let isOwnProfile = false;
-    
-    for (const btn of Array.from(allButtons)) {
-      const text = (btn as HTMLElement).innerText || '';
-      if (text.includes('Редактировать') || text.includes('Edit')) {
-        isOwnProfile = true;
-        break;
-      }
-    }
-    
-    if (!isOwnProfile) {
-      console.log('[SteamStreak] Not your profile');
+    tryDetectAndSaveOwnID();
+
+    const savedOwnID = localStorage.getItem('steam_streak_own_id');
+    if (!savedOwnID) {
+      console.log('[SteamStreak] Own Steam ID not yet known, skipping');
       return;
+    }
+
+    const mySteamID = savedOwnID;
+    const urlMatch = currentUrl.match(/profiles\/(\d+)/);
+    if (urlMatch && urlMatch[1] !== mySteamID) {
+      console.log('[SteamStreak] Not your profile (Steam ID mismatch)');
+      return;
+    }
+
+    if (currentUrl.includes('/id/')) {
+      const allButtons = document.querySelectorAll('button, [role="button"], a, div[onclick]');
+      let isOwnProfile = false;
+      for (const btn of Array.from(allButtons)) {
+        const text = (btn as HTMLElement).innerText || '';
+        if (text.includes('Редактировать') || text.includes('Edit profile') || text === 'Edit') {
+          isOwnProfile = true;
+          break;
+        }
+      }
+      if (!isOwnProfile) {
+        console.log('[SteamStreak] Not your profile (no edit button on vanity URL)');
+        return;
+      }
     }
     
     console.log('[SteamStreak] On own profile, loading data...');
@@ -928,7 +962,8 @@ function addStreakBadge() {
     const badge = createStreakBadge(streak);
 
     let editButton = null;
-    for (const btn of Array.from(allButtons)) {
+    const allBtns = document.querySelectorAll('button, [role="button"], a, div[onclick]');
+    for (const btn of Array.from(allBtns)) {
       const text = (btn as HTMLElement).innerText || '';
       if (text.includes('Редактировать') || text.includes('Edit')) {
         editButton = btn as HTMLElement;
