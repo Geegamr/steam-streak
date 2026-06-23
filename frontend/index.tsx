@@ -18,7 +18,7 @@ export default async function OnPluginLoad() {
       }
     });
   } catch (error) {
-    console.error("[GameStreak] ERROR in OnPluginLoad():", error);
+    console.error("[SteamStreak] ERROR in OnPluginLoad():", error);
   }
 }
 
@@ -43,10 +43,11 @@ function startLocationMonitor(window: Window) {
         }
       }
     } catch (error) {
-      console.error("[GameStreak] ERROR in check():", error);
+      console.error("[SteamStreak] ERROR in check():", error);
     }
   };
 
   check();
   setInterval(check, POLL_INTERVAL);
 }
+

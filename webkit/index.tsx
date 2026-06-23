@@ -906,82 +906,101 @@ function createStreakBadge(streak: number) {
   return badge;
 }
 
-function addStreakBadge() {
-  try {
-    console.log('[SteamStreak] === addStreakBadge() called ===');
+  function addStreakBadge() {
+   try {
+     console.log('[SteamStreak] === addStreakBadge() called ===');
 
-    const currentUrl = window.location.href;
-    if (!currentUrl.includes('steamcommunity.com/profiles/') && 
-        !currentUrl.includes('steamcommunity.com/id/')) {
-      console.log('[SteamStreak] Not on profile page');
-      return;
-    }
+     const currentUrl = window.location.href;
+     if (!currentUrl.includes('steamcommunity.com/profiles/') && 
+         !currentUrl.includes('steamcommunity.com/id/')) {
+       console.log('[SteamStreak] Not on profile page');
+       return;
+     }
 
-    tryDetectAndSaveOwnID();
+     tryDetectAndSaveOwnID();
 
-    const savedOwnID = localStorage.getItem('steam_streak_own_id');
-    if (!savedOwnID) {
-      console.log('[SteamStreak] Own Steam ID not yet known, skipping');
-      return;
-    }
+     const savedOwnID = localStorage.getItem('steam_streak_own_id');
+     if (!savedOwnID) {
+       console.log('[SteamStreak] Own Steam ID not yet known, skipping');
+       return;
+     }
 
-    const mySteamID = savedOwnID;
-    const urlMatch = currentUrl.match(/profiles\/(\d+)/);
-    if (urlMatch && urlMatch[1] !== mySteamID) {
-      console.log('[SteamStreak] Not your profile (Steam ID mismatch)');
-      return;
-    }
+     const mySteamID = savedOwnID;
+     const urlMatch = currentUrl.match(/profiles\/(\d+)/);
+     if (urlMatch && urlMatch[1] !== mySteamID) {
+       console.log('[SteamStreak] Not your profile (Steam ID mismatch)');
+       return;
+     }
 
-    if (currentUrl.includes('/id/')) {
-      const allButtons = document.querySelectorAll('button, [role="button"], a, div[onclick]');
-      let isOwnProfile = false;
-      for (const btn of Array.from(allButtons)) {
-        const text = (btn as HTMLElement).innerText || '';
-        if (text.includes('Редактировать') || text.includes('Edit profile') || text === 'Edit') {
-          isOwnProfile = true;
-          break;
-        }
-      }
-      if (!isOwnProfile) {
-        console.log('[SteamStreak] Not your profile (no edit button on vanity URL)');
-        return;
-      }
-    }
-    
-    console.log('[SteamStreak] On own profile, loading data...');
+     if (currentUrl.includes('/id/')) {
+       const allButtons = document.querySelectorAll('button, [role="button"], a, div[onclick]');
+       let isOwnProfile = false;
+       for (const btn of Array.from(allButtons)) {
+         const text = (btn as HTMLElement).innerText || '';
+         if (text.includes('Редактировать') || text.includes('Edit profile') || text === 'Edit') {
+           isOwnProfile = true;
+           break;
+         }
+       }
+       if (!isOwnProfile) {
+         console.log('[SteamStreak] Not your profile (no edit button on vanity URL)');
+         return;
+       }
+     }
+     
+     console.log('[SteamStreak] On own profile, loading data...');
 
-    const { streak } = getStreakData();
-    
-    console.log('[SteamStreak] Creating badge with streak:', streak);
+     const { streak } = getStreakData();
+     
+     console.log('[SteamStreak] Creating badge with streak:', streak);
 
-    const oldBadge = document.getElementById('steam-streak-badge');
-    const oldBadgeV2 = document.getElementById('steam-streak-badge-v2');
-    if (oldBadge) oldBadge.remove();
-    if (oldBadgeV2) oldBadgeV2.remove();
+     const oldBadge = document.getElementById('steam-streak-badge');
+     const oldBadgeV2 = document.getElementById('steam-streak-badge-v2');
+     if (oldBadge) oldBadge.remove();
+     if (oldBadgeV2) oldBadgeV2.remove();
 
-    const badge = createStreakBadge(streak);
+     const badge = createStreakBadge(streak);
 
-    let editButton = null;
-    const allBtns = document.querySelectorAll('button, [role="button"], a, div[onclick]');
-    for (const btn of Array.from(allBtns)) {
-      const text = (btn as HTMLElement).innerText || '';
-      if (text.includes('Редактировать') || text.includes('Edit')) {
-        editButton = btn as HTMLElement;
-        break;
-      }
-    }
-    
-    if (editButton && editButton.parentElement) {
-      editButton.parentElement.insertBefore(badge, editButton.nextSibling);
-      console.log('[SteamStreak] Badge added successfully with streak:', streak);
-    } else {
-      console.log('[SteamStreak] Edit button not found');
-    }
-    
-  } catch (error) {
-    console.error('[SteamStreak] Error:', error);
-  }
-}
+     let editButton = null;
+     const allBtns = document.querySelectorAll('button, [role="button"], a, div[onclick]');
+     for (const btn of Array.from(allBtns)) {
+       const text = (btn as HTMLElement).innerText || '';
+       if (text.includes('Редактировать') || text.includes('Edit')) {
+         editButton = btn as HTMLElement;
+         break;
+       }
+     }
+     
+     if (editButton) {
+       let inserted = false;
+
+       if (editButton.parentElement) {
+         editButton.parentElement.insertBefore(badge, editButton.nextSibling);
+         inserted = true;
+         console.log('[SteamStreak] Badge inserted after edit button (parent)');
+       }
+
+       if (!inserted && editButton.nextElementSibling) {
+         editButton.nextElementSibling.before(badge);
+         inserted = true;
+         console.log('[SteamStreak] Badge inserted before next sibling');
+       }
+
+       if (!inserted) {
+         editButton.after(badge);
+         inserted = true;
+         console.log('[SteamStreak] Badge inserted after edit button (after)');
+       }
+       
+       console.log('[SteamStreak] Badge added successfully with streak:', streak);
+     } else {
+       console.log('[SteamStreak] Edit button not found');
+     }
+     
+   } catch (error) {
+     console.error('[SteamStreak] Error:', error);
+   }
+ }
 
 setTimeout(() => {
   preloadIcons();

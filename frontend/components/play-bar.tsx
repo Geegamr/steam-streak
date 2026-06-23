@@ -15,13 +15,18 @@ export function GameStreak(props: {
     injectStreakStyles(win);
 
     const div = document.createElement("div");
-    div.className = `${PlayBar.GameStat} ${PlayBar.LastPlayed} Panel`;
+    div.className = `${PlayBar.GameStat} ${PlayBar.LastPlayed}`;
     div.style.cssText = "cursor: default; display: flex !important; flex-direction: row !important; align-items: center !important; padding: 6px 12px !important; min-height: 36px !important; max-height: 50px !important; box-sizing: border-box !important; flex-shrink: 0 !important; flex-grow: 0 !important; margin: 0 !important; position: relative !important; z-index: 1 !important;";
 
     const iconDiv = document.createElement("div");
     iconDiv.className = `${PlayBar.GameStatIcon} ${PlayBar.PlaytimeIcon}`;
     iconDiv.style.cssText = "font-size: 22px; margin-right: 12px; display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important; width: 24px !important; height: 24px !important;";
-    iconDiv.textContent = "🔥";
+    
+    const fireImg = document.createElement("img");
+    fireImg.src = "https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/orange80x80.png";
+    fireImg.style.cssText = "width: 22px !important; height: 22px !important; object-fit: contain !important;";
+    fireImg.alt = "Fire streak";
+    iconDiv.appendChild(fireImg);
 
     const contentDiv = document.createElement("div");
     contentDiv.className = PlayBar.GameStatRight;
@@ -37,6 +42,9 @@ export function GameStreak(props: {
       ? `${streak} ${getDaysWord(streak)} in a row`
       : "No streak yet";
 
+    div.style.backgroundColor = "rgba(0, 0, 0, 0.45) !important";
+    div.style.borderRadius = "4px !important";
+
     contentDiv.appendChild(labelDiv);
     contentDiv.appendChild(valueDiv);
     div.appendChild(iconDiv);
@@ -48,7 +56,7 @@ export function GameStreak(props: {
   injectStreakStyles(win);
 
   return React.createElement("div", {
-    className: `${PlayBar.GameStat} ${PlayBar.LastPlayed} Panel`,
+    className: `${PlayBar.GameStat} ${PlayBar.LastPlayed}`,
     style: {
       cursor: "default",
       display: "flex",
@@ -68,7 +76,6 @@ export function GameStreak(props: {
     React.createElement("div", {
       className: `${PlayBar.GameStatIcon} ${PlayBar.PlaytimeIcon}`,
       style: {
-        fontSize: "22px",
         marginRight: "12px",
         display: "flex",
         alignItems: "center",
@@ -77,7 +84,17 @@ export function GameStreak(props: {
         width: "24px",
         height: "24px"
       }
-    }, "🔥"),
+    },
+        React.createElement("img", {
+          src: "https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/orange80x80.png",
+          alt: "Fire streak",
+          style: {
+            width: "22px",
+            height: "22px",
+            objectFit: "contain"
+          }
+        })
+    ),
     React.createElement("div", {
       className: PlayBar.GameStatRight
     },
@@ -100,30 +117,32 @@ function injectStreakStyles(win: Window) {
   const style = doc.createElement("style");
   style.id = "gs-streak-styles";
   style.textContent = `
-    .gs-streak-label {
-      text-transform: uppercase !important;
-      font-size: 14px !important;
-      font-weight: 800 !important;
-      color: #b8b6b4 !important;
-      line-height: 1.3 !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      letter-spacing: 0.5px !important;
-      font-family: "Motiva Sans", Arial, sans-serif !important;
-      opacity: 1 !important;
-      background: none !important;
-    }
-    .gs-streak-value {
-      font-size: 13px !important;
-      font-weight: 700 !important;
-      color: #b8b6b4 !important;
-      line-height: 1.3 !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      font-family: "Motiva Sans", Arial, sans-serif !important;
-      opacity: 1 !important;
-      background: none !important;
-    }
+  .gs-streak-label {
+    text-transform: uppercase !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    letter-spacing: 0.5px !important;
+    font-family: "Motiva Sans", Arial, sans-serif !important;
+    opacity: 1 !important;
+    background: none !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  }
+  .gs-streak-value {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #e0e0e0 !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: "Motiva Sans", Arial, sans-serif !important;
+    opacity: 1 !important;
+    background: none !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  }
   `;
   doc.head.appendChild(style);
 
