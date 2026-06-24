@@ -1,7 +1,7 @@
 <div align="center">
 
 # Steam Streak 🔥
-
+## This is a fork to add support for [SpaceThemes](https://github.com/SpaceTheme/Steam)
 A [Millennium](https://steambrew.app/) plugin that tracks your daily Steam visits and game streaks with beautiful fire levels.
 
 <br/>
