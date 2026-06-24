@@ -3,7 +3,7 @@
   "name": "steam-streak",
   "common_name": "Steam Streak",
   "description": "Track your daily Steam profile visits and game play streaks with fire icons",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "backendType": "lua",
   "include": ["LICENSE"]
 }

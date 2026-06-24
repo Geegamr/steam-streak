@@ -4,33 +4,44 @@ const PlayBar = findClassModule((m) => m.GameStat) as Record<string, string>;
 
 export const PlayBarClasses = PlayBar;
 
+const streakImages = [
+  { min: 0, max: 9, url: "https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/orange80x80.png" },
+  { min: 10, max: 29, url: "https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/orangered80x80.png" },
+  { min: 30, max: 99, url: "https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/red80x80.png" },
+  { min: 100, max: 299, url: "https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/fiolet80x80.png" },
+  { min: 300, max: Infinity, url: "https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/temnofiolet80x80.png" },
+];
+
+function getStreakImage(streak: number): string {
+  const level = streakImages.find((l) => streak >= l.min && streak <= l.max);
+  return level ? level.url : streakImages[0].url;
+}
+
 export function GameStreak(props: {
   streak: number;
   window: Window;
 }) {
   const { streak, window: win } = props;
   const React = (win as any).SP_REACT;
+  const imageUrl = getStreakImage(streak);
 
   if (!React) {
     injectStreakStyles(win);
 
     const div = document.createElement("div");
-    div.className = `${PlayBar.GameStat} ${PlayBar.LastPlayed}`;
-    div.style.cssText = "cursor: default; display: flex !important; flex-direction: row !important; align-items: center !important; padding: 6px 12px !important; min-height: 36px !important; max-height: 50px !important; box-sizing: border-box !important; flex-shrink: 0 !important; flex-grow: 0 !important; margin: 0 !important; position: relative !important; z-index: 1 !important;";
+    div.className = "gs-streak-widget";
+    div.setAttribute("data-game-streak", "true");
+    div.style.cssText = "cursor: default; display: inline-flex !important; flex-direction: row !important; align-items: flex-start !important; padding: 2px 8px 2px 4px !important; box-sizing: border-box !important; flex-shrink: 0 !important; flex-grow: 0 !important; margin: 0 !important; position: relative !important; z-index: 1 !important; border: none !important; outline: none !important; box-shadow: none !important; background: none !important;";
 
-    const iconDiv = document.createElement("div");
-    iconDiv.className = `${PlayBar.GameStatIcon} ${PlayBar.PlaytimeIcon}`;
-    iconDiv.style.cssText = "font-size: 22px; margin-right: 12px; display: flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important; width: 24px !important; height: 24px !important;";
-    
     const fireImg = document.createElement("img");
-    fireImg.src = "https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/orange80x80.png";
-    fireImg.style.cssText = "width: 22px !important; height: 22px !important; object-fit: contain !important;";
-    fireImg.alt = "Fire streak";
-    iconDiv.appendChild(fireImg);
+    fireImg.src = imageUrl;
+    fireImg.style.cssText = "width: 28px !important; height: 28px !important; flex-shrink: 0 !important; margin-right: 8px !important; align-self: flex-start !important; vertical-align: middle !important; object-fit: contain !important;";
+    fireImg.alt = "";
+    div.appendChild(fireImg);
 
     const contentDiv = document.createElement("div");
-    contentDiv.className = PlayBar.GameStatRight;
-    contentDiv.style.cssText = "display: flex !important; flex-direction: column !important; justify-content: center !important; flex-grow: 1 !important; min-width: 0 !important;";
+    contentDiv.className = "gs-streak-content";
+    contentDiv.style.cssText = "display: flex !important; flex-direction: column !important; justify-content: flex-start !important; flex-grow: 1 !important; min-width: 0 !important; border: none !important; outline: none !important; box-shadow: none !important;";
 
     const labelDiv = document.createElement("div");
     labelDiv.className = "gs-streak-label";
@@ -42,12 +53,8 @@ export function GameStreak(props: {
       ? `${streak} ${getDaysWord(streak)} in a row`
       : "No streak yet";
 
-    div.style.backgroundColor = "rgba(0, 0, 0, 0.45) !important";
-    div.style.borderRadius = "4px !important";
-
     contentDiv.appendChild(labelDiv);
     contentDiv.appendChild(valueDiv);
-    div.appendChild(iconDiv);
     div.appendChild(contentDiv);
 
     return div;
@@ -56,13 +63,14 @@ export function GameStreak(props: {
   injectStreakStyles(win);
 
   return React.createElement("div", {
-    className: `${PlayBar.GameStat} ${PlayBar.LastPlayed}`,
+    className: "gs-streak-widget",
+    "data-game-streak": "true",
     style: {
       cursor: "default",
       display: "flex",
       flexDirection: "row",
-      alignItems: "center",
-      padding: "6px 12px",
+      alignItems: "flex-start",
+      padding: "2px 8px 2px 4px",
       minHeight: "36px",
       maxHeight: "50px",
       boxSizing: "border-box",
@@ -70,33 +78,27 @@ export function GameStreak(props: {
       flexGrow: 0,
       margin: 0,
       position: "relative",
-      zIndex: 1
+      zIndex: 1,
+      border: "none",
+      outline: "none",
+      boxShadow: "none"
     }
-  },
-    React.createElement("div", {
-      className: `${PlayBar.GameStatIcon} ${PlayBar.PlaytimeIcon}`,
+  }, 
+    React.createElement("img", {
+      src: imageUrl,
+      alt: "",
       style: {
-        marginRight: "12px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        width: "28px",
+        height: "28px",
         flexShrink: 0,
-        width: "24px",
-        height: "24px"
+        marginRight: "8px",
+        alignSelf: "flex-start",
+        verticalAlign: "middle",
+        objectFit: "contain"
       }
-    },
-        React.createElement("img", {
-          src: "https://cdn.jsdelivr.net/gh/BambooFury/steam-streak@main/static/orange80x80.png",
-          alt: "Fire streak",
-          style: {
-            width: "22px",
-            height: "22px",
-            objectFit: "contain"
-          }
-        })
-    ),
+    }),
     React.createElement("div", {
-      className: PlayBar.GameStatRight
+      className: "gs-streak-content"
     },
       React.createElement("div", { className: "gs-streak-label" }, "GAME STREAK"),
       React.createElement("div", { className: "gs-streak-value" },
@@ -117,31 +119,51 @@ function injectStreakStyles(win: Window) {
   const style = doc.createElement("style");
   style.id = "gs-streak-styles";
   style.textContent = `
+  .gs-streak-widget {
+    font-family: var(--st-font-family) !important;
+    background: none !important;
+  }
   .gs-streak-label {
     text-transform: uppercase !important;
     font-size: 14px !important;
     font-weight: 800 !important;
-    color: #ffffff !important;
+    color: #787878 !important;
     line-height: 1.3 !important;
     margin: 0 !important;
     padding: 0 !important;
     letter-spacing: 0.5px !important;
-    font-family: "Motiva Sans", Arial, sans-serif !important;
+    font-family: var(--st-font-family) !important;
     opacity: 1 !important;
     background: none !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
   }
   .gs-streak-value {
     font-size: 13px !important;
     font-weight: 700 !important;
-    color: #e0e0e0 !important;
+    color: #787878 !important;
     line-height: 1.3 !important;
     margin: 0 !important;
     padding: 0 !important;
-    font-family: "Motiva Sans", Arial, sans-serif !important;
+    font-family: var(--st-font-family) !important;
     opacity: 1 !important;
     background: none !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  }
+  .gs-streak-widget > img {
+    width: 28px !important;
+    height: 28px !important;
+    flex-shrink: 0 !important;
+    margin-right: 8px !important;
+    align-self: flex-start !important;
+    vertical-align: middle !important;
+    object-fit: contain !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+  }
+  .gs-streak-content {
+    justify-content: flex-start !important;
   }
   `;
   doc.head.appendChild(style);
